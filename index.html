@@ -110,7 +110,7 @@
     <script type="text/javascript">
 
       require([
-        "custom/layers/SolarTerminatorLayer"
+        "custom/layers/SolarTerminatorLayer",
         "dojo/dom-class",
         "dojo/dom",
         "dojo/on",
@@ -130,8 +130,7 @@
         esriConfig.defaults.geometryService = new GeometryService(location.protocol + "//utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
 
         var map = new Map("map", {
-            basemap: "gray",
-            center: [0, 45]
+            basemap: "gray"
         });
 
         var stLayer = new SolarTerminatorLayer({
