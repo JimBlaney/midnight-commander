@@ -1,95 +1,169 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-    <title>Locate Button Dijit</title>
-    <link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.7/js/esri/css/esri.css">
-    <link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.7/js/dojo/dijit/themes/claro/claro.css">
-    <link rel="stylesheet" type="text/css" href="css/LocateButton.css">
+
+    <title>midnight-commander</title>
+
+    <link rel="stylesheet" href="//js.arcgis.com/3.9/js/esri/css/esri.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css">
+
     <style type="text/css">
-    html, body{
-            height: 100%;
-            width: 95%;
-        }
-        .container{
-            height: 90%;
-            width: 90%;
-            position: relative;
-            padding: 10px;
-            border: 1px solid #eee;
-            -webkit-border-radius: 3px;
-            border-radius: 3px;
-        }
-        #map{
-            height: 100%;
-            position: relative;
-        }
-        #SunButton{
-            position:absolute;
-          top:95px;
-          left:20px;
-          z-index:50;
-        }
+
+      html,
+      body {
+        margin:   0;
+        padding:  0;
+        height:   100%;
+        width:    100%;
+        overflow: hidden;
+      }
+
+      #map {
+        position: relative;
+        height:   100%;
+        width:    100%;
+        background-color: #D0CFD4
+      }
+
+      #map[data-loaded] .esriCustomButton {
+        visibility: visible; /* display once map loads */
+      }
+
+      .esriCustomButton {
+        position: absolute;
+
+        text-align:  center;
+        line-height: 30px;
+
+        color:            #4c4c4c;
+        background-color: #fff;
+        border: 1px solid #57585a;
+
+        -webkit-user-select: none;
+        -moz-user-select:    none;
+        -ms-user-select:     none;
+        user-select:         none;
+
+        -webkit-border-radius: 5px;
+        -moz-border-radius:    5px;
+        -o-border-radius:      5px;
+        border-radius:         5px;
+
+        left:        20px;
+        width:       30px;
+        height:      30px;
+
+        z-index:     50;
+
+
+        cursor:      pointer;
+        visibility:  hidden; /* hide until map loads */
+      }
+
+      .esriCustomButton:hover {
+        background-color: #eee;
+      }
+
+      .esriCustomButton.checked {
+        -moz-box-shadow:    inset 0 0 10px #57585a;
+        -webkit-box-shadow: inset 0 0 10px #57585a;
+        box-shadow:         inset 0 0 10px #57585a;
+/*        background-color: #eee;*/
+      }
+
+      #worldButton {
+        top: 95px;
+      }
+
+      #sunButton {
+        top: 140px;
+      }
+
     </style>
-</head>
-<body>
-    <div class="container">
-        <div id="map" class="map">
-            <div id="SunButton"></div>
-        </div>
+  </head>
+  <body>
+    <div id="map">
+      <div id="worldButton" class="esriCustomButton" title="Zoom to the Full Extent">
+        <i class="fa fa-globe"></i>
+      </div>
+      <div id="sunButton" class="esriCustomButton" title="Toggle the Solar Terminator">
+        <i class="fa fa-moon-o"></i>
+      </div>
     </div>
-    
+
     <script type="text/javascript">
-        var package_path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-        var dojoConfig = {
-            // The locationPath logic below may look confusing but all its doing is 
-            // enabling us to load the api from a CDN and load local modules from the correct location.
-            packages: [{
-                name: "application",
-                location: package_path + '/js'
-            }]
-        };
+
+      var dojoConfig = {
+        packages: [{
+          name: "custom",
+          location: location.pathname.replace(/[^\/]+$/, '') + 'js/custom'
+        }]
+      };
+
     </script>
-    <script src="http://js.arcgis.com/3.7/" type="text/javascript"></script>
+
+    <script src="http://js.arcgis.com/3.9/" type="text/javascript"></script>
+
     <script type="text/javascript">
-        
-        require(["esri/map", "application/LocateButton", "dojo/on", "esri/tasks/GeometryService", "esri/layers/GraphicsLayer"], function(Map, LocateButton, on, GeometryService, GraphicsLayer){
-            
-            
-            esriConfig.defaults.geometryService = new GeometryService(location.protocol + "//utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
-            
-            var myMap = new Map("map", {
-                zoom: 2,
-                basemap: "streets"
-            });
-            
-            myMap.addLayer(new esri.layers.ArcGISTiledMapServiceLayer(
-                "http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer", {
-                id: "lyrWorldStreetMap"
-            }));
 
-            var myLayer = new GraphicsLayer({
-                id: "testLayer",
-                //opacity: 0.5
-            });
-            myMap.addLayer(myLayer);    
-            
-            myWidget = new LocateButton({
-                //useTracking: true,
-                graphicsLayer: myLayer,
-                map: myMap
-            }, "SunButton");
-            myWidget.startup();
-            
-            myWidget.on('locate', function(evt){
-                console.log(evt);
-            });
-            
+      require([
+        "custom/layers/SolarTerminatorLayer",
+        "dojo/dom-class",
+        "dojo/dom",
+        "dojo/on",
+        "esri/geometry/Extent",
+        "esri/map",
+        "esri/tasks/GeometryService",
+      ], function(
+        SolarTerminatorLayer,
+        domClass,
+        dom,
+        on,
+        Extent,
+        Map,
+        GeometryService
+      ) {
 
-            
+        esriConfig.defaults.geometryService = new GeometryService(location.protocol + "//utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
+
+        var map = new Map("map", {
+            basemap: "gray"
+        });
+
+        var stLayer = new SolarTerminatorLayer({
+          refreshIntervalMs: 1000,
+          visible: false
+        });
+
+        map.addLayer(stLayer);
+
+        on(dom.byId("sunButton"), "click", function() {
+
+          domClass.toggle(this, "checked");
+
+          stLayer.setVisibility(domClass.contains(this, "checked"));
 
         });
+
+        on(dom.byId("worldButton"), "click", function() {
+
+          map.setExtent(new Extent({
+            xmin: -21492243.0862327,
+            ymin: -21492243.0862327,
+            xmax: 21492243.0862327,
+            ymax: 21492243.0862327,
+            spatialReference: {
+              wkid: 102100
+            }
+          }));
+
+        });
+
+      });
+
     </script>
-</body>
+  </body>
 </html>
