@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+    <title>midnight-commander</title>
+
+    <link rel="stylesheet" href="//js.arcgis.com/3.9/js/esri/css/esri.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css">
+
+    <style type="text/css">
+
+      html,
+      body {
+        margin:   0;
+        padding:  0;
+        height:   100%;
+        width:    100%;
+        overflow: hidden;
+      }
+
+      #map {
+        position: relative;
+        height:   100%;
+        width:    100%;
+        background-color: #D0CFD4
+      }
+
+      #map[data-loaded] .esriCustomButton {
+        visibility: visible; /* display once map loads */
+      }
+
+      .esriCustomButton {
+        position: absolute;
+
+        text-align:  center;
+        line-height: 30px;
+
+        color:            #4c4c4c;
+        background-color: #fff;
+        border: 1px solid #57585a;
+
+        -webkit-user-select: none;
+        -moz-user-select:    none;
+        -ms-user-select:     none;
+        user-select:         none;
+
+        -webkit-border-radius: 5px;
+        -moz-border-radius:    5px;
+        -o-border-radius:      5px;
+        border-radius:         5px;
+
+        left:        20px;
+        width:       30px;
+        height:      30px;
+
+        z-index:     50;
+
+
+        cursor:      pointer;
+        visibility:  hidden; /* hide until map loads */
+      }
+
+      .esriCustomButton:hover {
+        background-color: #eee;
+      }
+
+      .esriCustomButton.checked {
+        -moz-box-shadow:    inset 0 0 10px #57585a;
+        -webkit-box-shadow: inset 0 0 10px #57585a;
+        box-shadow:         inset 0 0 10px #57585a;
+/*        background-color: #eee;*/
+      }
+
+      #worldButton {
+        top: 95px;
+      }
+
+      #sunButton {
+        top: 140px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="map">
+      <div id="worldButton" class="esriCustomButton" title="Zoom to the Full Extent">
+        <i class="fa fa-globe"></i>
+      </div>
+      <div id="sunButton" class="esriCustomButton" title="Toggle the Solar Terminator">
+        <i class="fa fa-moon-o"></i>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+      var dojoConfig = {
+        packages: [{
+          name: "custom",
+          location: location.pathname.replace(/[^\/]+$/, '') + 'js/custom'
+        }]
+      };
+
+    </script>
+
+    <script src="http://js.arcgis.com/3.9/" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+      require([
+        "custom/layers/SolarTerminatorLayer"
+        "dojo/dom-class",
+        "dojo/dom",
+        "dojo/on",
+        "esri/geometry/Extent",
+        "esri/map",
+        "esri/tasks/GeometryService",
+      ], function(
+        SolarTerminatorLayer,
+        domClass,
+        dom,
+        on,
+        Extent,
+        Map,
+        GeometryService
+      ) {
+
+        esriConfig.defaults.geometryService = new GeometryService(location.protocol + "//utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
+
+        var map = new Map("map", {
+            basemap: "gray",
+            center: [0, 45]
+        });
+
+        var stLayer = new SolarTerminatorLayer({
+          refreshIntervalMs: 1000,
+          visible: false
+        });
+
+        map.addLayer(stLayer);
+
+        on(dom.byId("sunButton"), "click", function() {
+
+          domClass.toggle(this, "checked");
+
+          stLayer.setVisibility(domClass.contains(this, "checked"));
+
+        });
+
+        on(dom.byId("worldButton"), "click", function() {
+
+          map.setExtent(new Extent({
+            xmin: -21492243.0862327,
+            ymin: -21492243.0862327,
+            xmax: 21492243.0862327,
+            ymax: 21492243.0862327,
+            spatialReference: {
+              wkid: 102100
+            }
+          }));
+
+        });
+
+      });
+
+    </script>
+  </body>
+</html>
